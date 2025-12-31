@@ -7,27 +7,39 @@
 
 <style>
 html, body {
-margin:0; padding:0; overflow:hidden; font-family:Arial,sans-serif;
-height:100%; width:100%; background:#0c0c0c; color:white; text-align:center; position:relative;
+  margin:0; padding:0; overflow:hidden;
+  font-family:Arial,sans-serif;
+  height:100%; width:100%;
+  background:#0c0c0c; color:white;
+  text-align:center; position:relative;
 }
 .screen {
-position:absolute; top:0; left:0; width:100%; height:100%; display:flex;
-flex-direction:column; justify-content:center; align-items:center;
-opacity:0; pointer-events:none; transition: all 0.8s ease; transform:scale(0.95);
+  position:absolute; top:0; left:0;
+  width:100%; height:100%;
+  display:flex; flex-direction:column;
+  justify-content:center; align-items:center;
+  opacity:0; pointer-events:none;
+  transition:all 0.8s ease;
+  transform:scale(0.95);
 }
 .active {opacity:1; pointer-events:auto; transform:scale(1);}
 button {
-padding:15px 30px; font-size:20px; border:none; border-radius:12px;
-margin-top:20px; cursor:pointer;
-background: linear-gradient(45deg,#ff3cac,#784ba0,#2b86c5); color:white;
-position:relative;
+  padding:15px 30px; font-size:20px;
+  border:none; border-radius:12px;
+  margin-top:20px; cursor:pointer;
+  background:linear-gradient(45deg,#ff3cac,#784ba0,#2b86c5);
+  color:white; position:relative;
 }
 input {
-padding:12px; font-size:18px; border-radius:10px;
-border:2px solid white; text-align:center; margin-top:20px;
+  padding:12px; font-size:18px;
+  border-radius:10px; border:2px solid white;
+  text-align:center; margin-top:20px;
 }
 #giftIcon {font-size:60px; cursor:pointer; animation:bounce 1s infinite;}
-@keyframes bounce {0%,100%{transform:translateY(0);}50%{transform:translateY(-20px);}}
+@keyframes bounce {
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(-20px);}
+}
 canvas {position:absolute; top:0; left:0; pointer-events:none;}
 h2 {padding:0 20px; line-height:1.5em;}
 .flyingEmoji {position:absolute; font-size:50px;}
@@ -37,212 +49,230 @@ h2 {padding:0 20px; line-height:1.5em;}
 <body>
 <canvas id="canvas"></canvas>
 
-<!-- Start -->
+<!-- START -->
 <div id="start" class="screen active">
-<h1>🎉 Ready for a Surprise?</h1>
-<button onclick="goName()">Start</button>
+  <h1>🎉 Ready for a Surprise?</h1>
+  <button onclick="goName()">Start</button>
 </div>
 
-<!-- Name -->
+<!-- NAME -->
 <div id="name" class="screen">
-<h2>Enter Your Name 💫</h2>
-<input id="username" placeholder="Your Name">
-<button onclick="checkName()">Next</button>
+  <h2>Enter Your Name 💫</h2>
+  <input id="username" placeholder="Your Name">
+  <button onclick="checkName()">Next</button>
 </div>
 
-<!-- Verification -->
+<!-- VERIFICATION -->
 <div id="verify" class="screen">
-<h2>Verification pls 🥺💖</h2>
-<input id="verifyInput" placeholder="say it 👀">
-<button onclick="checkVerification()">Verify</button>
+  <h2>Verification pls 🥺💖</h2>
+  <input id="verifyInput" placeholder="say it 👀">
+  <button onclick="checkVerification()">Verify</button>
 </div>
 
+<!-- MESSAGE CONTAINER -->
 <div id="aribaPages" class="screen"></div>
 
+<!-- GIFT -->
 <div id="giftScreen" class="screen">
-<div id="giftIcon">🎁</div>
+  <div id="giftIcon">🎁</div>
 </div>
 
+<!-- GENERIC FINAL -->
 <div id="genericFinal" class="screen">
-<h2>Happy New Year 🎆✨</h2>
+  <h2 id="genericText"></h2>
 </div>
 
 <script>
-// canvas setup SAME
+// ===== CANVAS EFFECTS (UNCHANGED) =====
 let canvas=document.getElementById('canvas');
 let ctx=canvas.getContext('2d');
 canvas.width=innerWidth; canvas.height=innerHeight;
 
-// hearts
 let hearts=[];
 for(let i=0;i<20;i++){
-hearts.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*15+5,speed:Math.random()*0.5+0.2,opacity:Math.random()*0.4+0.3});
+  hearts.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*15+5,speed:Math.random()*0.5+0.2,opacity:Math.random()*0.4+0.3});
 }
 
-// confetti
 let confetti=[];
 function Confetti(){
-this.x=Math.random()*canvas.width;
-this.y=Math.random()*canvas.height-50;
-this.vx=(Math.random()-0.5)*2.5;
-this.vy=Math.random()*2+1;
-this.color=`hsl(${Math.random()*360},100%,50%)`;
-this.draw=function(){
-ctx.fillStyle=this.color;
-ctx.fillRect(this.x,this.y,5,10);
-this.x+=this.vx; this.y+=this.vy;
-if(this.y>canvas.height)this.y=-10;
-}
+  this.x=Math.random()*canvas.width;
+  this.y=Math.random()*canvas.height-50;
+  this.vx=(Math.random()-0.5)*2.5;
+  this.vy=Math.random()*2+1;
+  this.color=`hsl(${Math.random()*360},100%,50%)`;
+  this.draw=()=>{
+    ctx.fillStyle=this.color;
+    ctx.fillRect(this.x,this.y,5,10);
+    this.x+=this.vx; this.y+=this.vy;
+    if(this.y>canvas.height)this.y=-10;
+  }
 }
 
-// fireworks
 let fireworks=[];
 function Firework(x,y,color){
-this.particles=[];
-for(let i=0;i<30;i++){
-this.particles.push({x,y,vx:(Math.random()-0.5)*5,vy:(Math.random()-0.5)*5,alpha:1,color});
-}
-this.draw=function(){
-this.particles.forEach(p=>{
-ctx.fillStyle=`rgba(${p.color.r},${p.color.g},${p.color.b},${p.alpha})`;
-ctx.beginPath(); ctx.arc(p.x,p.y,3,0,Math.PI*2); ctx.fill();
-p.x+=p.vx; p.y+=p.vy; p.alpha-=0.03;
-});
-this.particles=this.particles.filter(p=>p.alpha>0);
-}
+  this.particles=[];
+  for(let i=0;i<30;i++){
+    this.particles.push({x,y,vx:(Math.random()-0.5)*5,vy:(Math.random()-0.5)*5,alpha:1,color});
+  }
+  this.draw=()=>{
+    this.particles.forEach(p=>{
+      ctx.fillStyle=`rgba(${p.color.r},${p.color.g},${p.color.b},${p.alpha})`;
+      ctx.beginPath(); ctx.arc(p.x,p.y,3,0,Math.PI*2); ctx.fill();
+      p.x+=p.vx; p.y+=p.vy; p.alpha-=0.03;
+    });
+    this.particles=this.particles.filter(p=>p.alpha>0);
+  }
 }
 
 function animate(){
-ctx.clearRect(0,0,canvas.width,canvas.height);
-hearts.forEach(h=>{
-ctx.fillStyle=`rgba(255,0,150,${h.opacity})`;
-ctx.beginPath(); ctx.arc(h.x,h.y,h.size,0,Math.PI*2); ctx.fill();
-h.y-=h.speed; if(h.y<0)h.y=canvas.height;
-});
-confetti.forEach(c=>c.draw());
-fireworks.forEach(f=>f.draw());
-fireworks=fireworks.filter(f=>f.particles.length>0);
-requestAnimationFrame(animate);
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  hearts.forEach(h=>{
+    ctx.fillStyle=`rgba(255,0,150,${h.opacity})`;
+    ctx.beginPath(); ctx.arc(h.x,h.y,h.size,0,Math.PI*2); ctx.fill();
+    h.y-=h.speed; if(h.y<0)h.y=canvas.height;
+  });
+  confetti.forEach(c=>c.draw());
+  fireworks.forEach(f=>f.draw());
+  fireworks=fireworks.filter(f=>f.particles.length>0);
+  requestAnimationFrame(animate);
 }
 animate();
 
 function burstConfetti(){for(let i=0;i<20;i++) confetti.push(new Confetti());}
 function burstFireworks(){
-for(let i=0;i<3;i++){
-fireworks.push(new Firework(Math.random()*canvas.width,Math.random()*canvas.height/2,{
-r:Math.random()*255,g:Math.random()*255,b:Math.random()*255
-}));
-}
+  for(let i=0;i<3;i++){
+    fireworks.push(new Firework(
+      Math.random()*canvas.width,
+      Math.random()*canvas.height/2,
+      {r:Math.random()*255,g:Math.random()*255,b:Math.random()*255}
+    ));
+  }
 }
 
+// ===== SCREEN CONTROL =====
 function show(id){
-document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
 }
-
 function goName(){show('name');}
 
-// NAME CHECK
 let enteredName="";
+
+// ===== NAME CHECK =====
 function checkName(){
-enteredName=document.getElementById('username').value.toLowerCase().trim();
-if(enteredName==="ariba"){show('verify');}
-else if(enteredName==="habiba"){startHabibaFlow();}
-else{show('giftScreen');}
+  enteredName=document.getElementById('username').value.trim().toLowerCase();
+  if(enteredName==="ariba"){show('verify');}
+  else if(enteredName==="habiba"){startHabibaFlow();}
+  else{show('giftScreen');}
 }
 
-// VERIFICATION
+// ===== VERIFICATION =====
 function checkVerification(){
-let v=document.getElementById('verifyInput').value.trim().toLowerCase();
-if(v==="aweee mera bacha"){startAribaFlow();}
-else{
-document.body.innerHTML="<h1 style='color:white;text-align:center;margin-top:40vh;'>u aint my didi, gtfo 🖕</h1>";
-}
+  let v=document.getElementById('verifyInput').value.trim().toLowerCase();
+  if(v==="aweee mera bacha"){startAribaFlow();}
+  else{
+    document.body.innerHTML="<h1 style='margin-top:40vh;'>u aint my didi, gtfo 🖕</h1>";
+  }
 }
 
-// ARIBA FLOW (UNCHANGED TEXT)
+// ===== ARIBA FLOW (EXACT TEXT) =====
 const aribaMessages=[
-"Didi? 💖","Is it really u? 🥹","I really love you ❤️‍🩹","You’re the best 🥰",
+"Didi? 💖",
+"Is it really u? 🥹",
+"I really love you ❤️‍🩹",
+"You’re the best 🥰",
 "You kinda understood me like no one ever did 😌",
 "I felt comfortable around you like I never did around anyone else 💖",
-"The Head Scratch ❤️‍🩹","The Tea Spill 💅",
+"The Head Scratch ❤️‍🩹",
+"The Tea Spill 💅",
 "Aapka vo waala message really made me throw my phone 🥹",
-"❤️‍🩹 Didi… you are unlike anyone I’ve ever met.",
-"Every moment with you feels safe and comforting.",
-"You are my favorite bari behn 💖",
-"Happy New Year Didi 🎉🎆"
+"❤️‍🩹 “Didi… you are unlike anyone I’ve ever met. You see me in ways no one else did, and being around you feels like coming home.”",
+"I can laugh with you, cry with you, and share thoughts I never dared before. Every moment with you feels safe, comforting, magical, like the world pauses just for us.",
+"Your words, your smile, your care have touched me more deeply than I can express. You are my favorite bari behn, my safe space, my inspiration, my laughter, and my heart.",
+"Every memory we shared is a treasure, and I can’t wait to make countless more with you. You are truly special, unforgettable, and I absolutely love you 🥹❤️‍🩹. This surprise is all for you because no one deserves it more. ❤️‍🩹💖”",
+"Happy New Year Didi ❤️‍🩹❤️‍🩹🎉🎆"
 ];
+
 let currentAriba=0;
-
 function startAribaFlow(){
-currentAriba=0;
-show('aribaPages');
-showAribaMessage();
+  currentAriba=0;
+  show('aribaPages');
+  showAribaMessage();
 }
-
 function showAribaMessage(){
-let c=document.getElementById('aribaPages');
-c.innerHTML="";
-let h=document.createElement('h2');
-h.innerHTML=aribaMessages[currentAriba];
-let b=document.createElement('button');
-b.innerText="Next";
-b.onclick=()=>{
-currentAriba++;
-if(currentAriba<aribaMessages.length){
-showAribaMessage(); burstConfetti(); burstFireworks();
-}
-};
-c.appendChild(h); c.appendChild(b);
-burstConfetti();
+  let c=document.getElementById('aribaPages');
+  c.innerHTML="";
+  let h=document.createElement('h2');
+  h.innerHTML=aribaMessages[currentAriba];
+  let b=document.createElement('button');
+  b.innerText="Next";
+  b.onclick=()=>{
+    currentAriba++;
+    if(currentAriba<aribaMessages.length){
+      showAribaMessage(); burstConfetti(); burstFireworks();
+    }
+  };
+  c.appendChild(h); c.appendChild(b);
+  burstConfetti();
 }
 
-// HABIBA FLOW
+// ===== HABIBA FLOW =====
 let habibaStep=0;
 function startHabibaFlow(){
-habibaStep=0;
-show('aribaPages');
-showHabiba();
+  habibaStep=0;
+  show('aribaPages');
+  showHabiba();
 }
-
 function showHabiba(){
-let c=document.getElementById('aribaPages');
-c.innerHTML="";
-let h=document.createElement('h2');
-let b=document.createElement('button');
-b.innerText="Next";
+  let c=document.getElementById('aribaPages');
+  c.innerHTML="";
+  let h=document.createElement('h2');
+  let b=document.createElement('button');
+  b.innerText="Next";
 
-if(habibaStep===4){
-h.innerHTML="alr if u want it so bad tell ayyanu babu to wish it to u — me nai kar raha 😒";
+  if(habibaStep===4){
+    h.innerHTML="alr if u want it so bad tell ayyanu babu to wish it to u — me nai kar raha 😒";
+  }
+  else if(habibaStep===5){
+    let gift=document.createElement('div');
+    gift.innerHTML="🎁";
+    gift.style.fontSize="70px";
+    gift.onclick=()=>{
+      ["🫵","🤡"].forEach((e,i)=>{
+        let em=document.createElement('div');
+        em.className="flyingEmoji";
+        em.innerText=e;
+        em.style.left=(40+i*15)+"%";
+        em.style.top="40%";
+        document.body.appendChild(em);
+      });
+    };
+    c.appendChild(gift);
+    return;
+  } else {
+    h.innerHTML="🙂";
+  }
+
+  b.onclick=()=>{
+    habibaStep++;
+    if(habibaStep===1){b.style.position="absolute";b.style.top="10px";b.style.left="10px";}
+    if(habibaStep===2){b.style.bottom="10px";b.style.right="10px";b.style.top="";b.style.left="";}
+    if(habibaStep===3){b.style.top="10px";b.style.right="10px";b.style.bottom="";}
+    showHabiba();
+  };
+
+  c.appendChild(h); c.appendChild(b);
 }
-else if(habibaStep===5){
-let gift=document.createElement("div");
-gift.innerHTML="🎁"; gift.style.fontSize="70px";
-gift.onclick=()=>{
-["🫵","🤡"].forEach((e,i)=>{
-let em=document.createElement("div");
-em.className="flyingEmoji"; em.innerText=e;
-em.style.left=50+i*80+"%"; em.style.top="40%";
-document.body.appendChild(em);
-});
+
+// ===== GENERIC GIFT FLOW (OTHER NAMES) =====
+document.getElementById('giftIcon').onclick=()=>{
+  show('genericFinal');
+  document.getElementById('genericText').innerHTML=
+  "🌟 As the new year begins, may your days be filled with peace, strength, and genuine happiness.<br><br>" +
+  "May every challenge turn into growth, every effort turn into success, and every dream move one step closer to reality.<br><br>" +
+  "Wishing you a beautiful, powerful, and unforgettable New Year 🎆✨";
+  burstConfetti(); burstFireworks();
 };
-c.appendChild(gift);
-return;
-}
-else{
-h.innerHTML="🙂";
-}
-
-b.onclick=()=>{
-habibaStep++;
-if(habibaStep===1)b.style.position="absolute",b.style.top="10px",b.style.left="10px";
-if(habibaStep===2)b.style.bottom="10px",b.style.right="10px",b.style.top="",b.style.left="";
-if(habibaStep===3)b.style.top="10px",b.style.right="10px",b.style.bottom="";
-showHabiba();
-};
-
-c.appendChild(h); c.appendChild(b);
-}
 </script>
 </body>
 </html>
